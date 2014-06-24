@@ -41,11 +41,18 @@ function _renderFile(filename, options, cb) {
     try{
         var template = doT.template(str, null, _globals);
     } catch (e) {
-        return cb("Could not create template function from " + filename);
+        return cb("Could not create template from file\n " + filename);
     }
 
     if (options.cache) _cache[filename] = template;
-    return cb(null, template.call(_globals, options));
+
+    try {
+        var rendering = template.call(_globals, options);
+    } catch (er){
+        return cb("Could not apply data to template from file " + filename);
+    }
+
+    return cb(null, rendering);
   });
 }
 
