@@ -12,18 +12,18 @@ var _globals = {
         // let's try loading content from cache
         if(_globals.partialCache == true)
             template = _partialsCache[file];
-         
-        // no content so let's load from file system 
+
+        // no content so let's load from file system
         if(template == null){
-          template = fs.readFileSync(path.join(path.dirname(process.argv[1]), file)); 
+          template = fs.readFileSync(path.join(path.dirname(process.argv[1]), file));
         }
-        
-        // let's cache the partial  
+
+        // let's cache the partial
         if(_globals.partialCache == true)
             _partialsCache[file] = template;
-        
+
         return template;
-  	} 
+    }
 };
 
 function _renderFile(filename, options, cb) {
@@ -38,7 +38,12 @@ function _renderFile(filename, options, cb) {
   return fs.readFile(filename, 'utf8', function(err, str) {
     if (err) return cb(err);
 
-    var template = doT.template(str, null, _globals);
+    try{
+        var template = doT.template(str, null, _globals);
+    } catch (e) {
+        return cb("Could not create template function from " + filename);
+    }
+
     if (options.cache) _cache[filename] = template;
     return cb(null, template.call(_globals, options));
   });
@@ -59,7 +64,7 @@ exports.setGlobals = function(globals) {
   'use strict';
   for(var f in _globals){
     if(globals[f] == null){
-      globals[f] = _globals[f];  
+      globals[f] = _globals[f];
     }
     else
       throw new Error("Your global uses reserved utility: " + f);
